@@ -1,0 +1,20 @@
+2025-07-11T09:05:12Z | event=enrollment_success | user_id=101;user_name=Budi S;user_city=Jakarta | course_id=C-01;course_name=Dasar-dasar Python;category=Pemrograman | price=550000;promo_code=HEMAT50
+2025-07-11T09:07:45Z | event=enrollment_success | user_id=205;user_name=Citra A;user_city=Bandung | course_id=C-02;course_name=Manajemen Proyek Digital;category=Bisnis | price=750000;promo_code=NULL
+2025-07-11T09:10:22Z | event=enrollment_success | user_id=101;user_name=Budi S;user_city=Jakarta | course_id=C-03;course_name=Desain Grafis untuk Pemula;category=Desain | price=600000;promo_code=DISKON100
+2025-07-11T09:12:00Z | event=enrollment_success | user_id=310;user_name=Eka P;user_city=Surabaya | course_id=C-01;course_name=Dasar-dasar Python;category=Pemrograman | price=550000;promo_code=NULL
+2025-07-11T09:15:30Z | event=enrollment_success | user_id=205;user_name=Citra A;user_city=Bandung | course_id=C-04;course_name=Pemasaran Media Sosial;category=Pemasaran | price=700000;promo_code=MARKET25
+2025-07-11T09:18:05Z | event=enrollment_success | user_id=415;user_name=Farah D;user_city=Medan | course_id=C-02;course_name=Manajemen Proyek Digital;category=Bisnis | price=750000;promo_code=NULL
+2025-07-11T09:21:11Z | event=enrollment_success | user_id=520;user_name=Gilang R;user_city=Yogyakarta | course_id=C-05;course_name=Analisis Data dengan SQL;category=Pemrograman | price=650000;promo_code=SQLMASTER
+2025-07-11T09:22:40Z | event=enrollment_success | user_id=101;user_name=Budi S;user_city=Jakarta | course_id=C-05;course_name=Analisis Data dengan SQL;category=Pemrograman | price=650000;promo_code=NULL
+2025-07-11T09:25:01Z | event=enrollment_success | user_id=633;user_name=Hana L;user_city=Semarang | course_id=C-03;course_name=Desain Grafis untuk Pemula;category=Desain | price=600000;promo_code=NULL
+2025-07-11T09:28:19Z | event=enrollment_success | user_id=310;user_name=Eka P;user_city=Surabaya | course_id=C-04;course_name=Pemasaran Media Sosial;category=Pemasaran | price=700000;promo_code=MARKET25
+2025-07-12T11:30:00Z | event=enrollment_success | user_id=741;user_name=Indra K;user_city=Denpasar | course_id=C-01;course_name=Dasar-dasar Python;category=Pemrograman | price=550000;promo_code=HEMAT50
+2025-07-12T11:32:15Z | event=enrollment_success | user_id=852;user_name=Jasmine M;user_city=Makassar | course_id=C-02;course_name=Manajemen Proyek Digital;category=Bisnis | price=750000;promo_code=NULL
+2025-07-12T11:35:45Z | event=enrollment_success | user_id=101;user_name=Budi S;user_city=Jakarta | course_id=C-04;course_name=Pemasaran Media Sosial;category=Pemasaran | price=700000;promo_code=NULL
+2025-07-12T11:38:03Z | event=enrollment_success | user_id=963;user_name=Kevin O;user_city=Palembang | course_id=C-05;course_name=Analisis Data dengan SQL;category=Pemrograman | price=650000;promo_code=SQLMASTER
+2025-07-12T11:40:55Z | event=enrollment_success | user_id=205;user_name=Citra A;user_city=Bandung | course_id=C-01;course_name=Dasar-dasar Python;category=Pemrograman | price=550000;promo_code=NULL
+2025-07-13T14:01:20Z | event=enrollment_success | user_id=112;user_name=Lia F;user_city=Jakarta | course_id=C-03;course_name=Desain Grafis untuk Pemula;category=Desain | price=600000;promo_code=DISKON100
+2025-07-13T14:03:33Z | event=enrollment_success | user_id=415;user_name=Farah D;user_city=Medan | course_id=C-05;course_name=Analisis Data dengan SQL;category=Pemrograman | price=650000;promo_code=NULL
+2025-07-13T14:05:00Z | event=enrollment_success | user_id=520;user_name=Gilang R;user_city=Yogyakarta | course_id=C-04;course_name=Pemasaran Media Sosial;category=Pemasaran | price=700000;promo_code=MARKET25
+2025-07-13T14:08:18Z | event=enrollment_success | user_id=633;user_name=Hana L;user_city=Semarang | course_id=C-02;course_name=Manajemen Proyek Digital;category=Bisnis | price=750000;promo_code=NULL
+2025-07-13T14:11:49Z | event=enrollment_success | user_id=741;user_name=Indra K;user_city=Denpasar | course_id=C-03;course_name=Desain Grafis untuk Pemula;category=Desain | price=600000;promo_code=NULL

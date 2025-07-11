@@ -3,7 +3,7 @@ This script reads semi-structured enrollment log data,
 parses and normalizes it into 3 dimension tables and 1 fact table
 based on the star schema defined in ClickHouse.
 
-Input:  data/raw/enrollment_logs.txt
+Input : data/raw/enrollment_logs.txt
 Output: CSVs in data/processed/:
     - dim_user.csv
     - dim_course.csv

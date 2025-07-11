@@ -5,7 +5,7 @@
 
 -- DIMENSION TABLE: dim_user
 -- Stores unique user information
-CREATE TABLE IF NOT EXISTS dim_user_rangsi (
+CREATE TABLE IF NOT EXISTS dim_user (
     user_id UInt64,                                      -- Primary identifier for user
     user_name String,                                    -- Full user name (not normalized further)
     user_city LowCardinality(String)                     -- City name: low cardinality, good compression
@@ -15,7 +15,7 @@ ORDER BY user_id;
 
 -- DIMENSION TABLE: dim_course
 -- Stores unique course metadata
-CREATE TABLE IF NOT EXISTS dim_course_rangsi (
+CREATE TABLE IF NOT EXISTS dim_course (
     course_id LowCardinality(String),                    -- Short course ID (e.g., "C-01")
     course_name String,                                  -- Course title
     category LowCardinality(String)                      -- Field/category: e.g., "Pemrograman", "Bisnis"
@@ -25,7 +25,7 @@ ORDER BY course_id;
 
 -- DIMENSION TABLE: dim_time
 -- Stores timestamp breakdown for time-based analysis
-CREATE TABLE IF NOT EXISTS dim_time_rangsi (
+CREATE TABLE IF NOT EXISTS dim_time (
     time_id DateTime,                                    -- Full timestamp (acts as primary key)
     date Date,                                           -- Date only (for calendar joins)
     year UInt16,
@@ -38,7 +38,7 @@ ORDER BY time_id;
 
 -- FACT TABLE: fact_enrollment
 -- Core table capturing enrollment transactions
-CREATE TABLE IF NOT EXISTS fact_enrollment_rangsi (
+CREATE TABLE IF NOT EXISTS fact_enrollment (
     -- Foreign keys (dimensions)
     time_id DateTime,                                    -- UTC timestamp of enrollment
     user_id UInt64,                                      -- FK to dim_user

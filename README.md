@@ -1,13 +1,13 @@
-# Course Enrollment Event Logs Data Mart ETL
+# Course Enrollment ETL: Event Logs to ClickHouse
 
-A manual ETL project that processes course enrollment event logs into a star-schema data mart using ClickHouse. This project extracts semi-structured log data, transforms it into normalized tables, and loads it into a columnar database for analysis.
+An ETL project that processes course enrollment event logs into a star-schema data mart using ClickHouse, with each step executed sequentially via modular scripts. This project extracts semi-structured log data, transforms it into normalized tables, and loads it into a columnar database for analysis.
 
 ---
 
 ## 1. Project Structure
 
 ```text
-course-enrollment-event-logs-mart-etl/
+course-enrollment-logs-to-clickhouse-etl/
 ├── data/
 │   ├── raw/                         # Input text log files
 │   │   └── enrollment_events.txt    # Raw enrollment event logs
@@ -22,167 +22,153 @@ course-enrollment-event-logs-mart-etl/
 │   └── clickhouse_loader.py         # Loads CSVs into ClickHouse tables
 ├── sql/
 │   └── schema_definition.sql        # DDL script to create dimension and fact tables
-├── .env                             # Environment variables for ClickHouse credentials (excluded from version control)
+├── docs/
+│   └── star-schema-etl-report.pdf   # Documentation of the ETL and star schema design
+├── requirements.txt                 # Python dependencies
+├── .env                             # Environment variables for ClickHouse credentials
 ├── .gitignore                       # Excludes .env, __pycache__, and compiled files
-└── README.md                        # Project documentation
+└── README.md                        # Project overview and usage guide
 ```
 
 ---
 
-## 2. File Details
+## 2. File Overview
 
-### `etl/main_etl.py`
+- **`etl/main_etl.py`**  
+  Pipeline entry point. Executes the transformation and loading steps in sequence with console logging.
 
-- Entry point for executing the ETL pipeline manually.
-- Coordinates log transformation and data loading sequentially.
-- Logs step progress to the console.
+- **`etl/log_transformer.py`**  
+  Parses raw event logs into four normalized CSV files:
+  `dim_user.csv`, `dim_course.csv`, `dim_time.csv`, and `fact_enrollment.csv`.  
+  Outputs are UTF-8 encoded with headers.
 
-### `etl/log_transformer.py`
+- **`etl/clickhouse_loader.py`**  
+  Loads the transformed CSVs into ClickHouse using `clickhouse-connect`.  
+  Reads database credentials from `.env` and handles type-safe insertions.
 
-- Parses raw enrollment logs and outputs normalized CSVs.
-- Splits raw data into:
-  - `dim_user.csv`
-  - `dim_course.csv`
-  - `dim_time.csv`
-  - `fact_enrollment.csv`
-- Ensures consistent formatting (e.g., UTF-8, header included).
+- **`sql/schema_definition.sql`**  
+  DDL script for creating ClickHouse tables with `LowCardinality`, `Nullable`, and partitioning optimizations.  
+  Intended for one-time setup.
 
-### `etl/clickhouse_loader.py`
+- **`data/raw/enrollment_logs.txt`**  
+  Raw semi-structured source file. Each line contains a single enrollment event.
 
-- Loads the processed CSVs into corresponding ClickHouse tables.
-- Reads credentials from `.env`.
-- Uses `clickhouse-connect` to insert rows using type-safe mapping.
-
-### `sql/schema_definition.sql`
-
-- DDL script for defining the ClickHouse schema.
-- Implements `LowCardinality`, `Nullable`, and optimized partitioning.
-- Intended to be executed once before loading any data.
-
-### `data/raw/enrollment_logs.txt`
-
-- Raw source logs with a semi-structured format.
-- Each line represents one enrollment event.
-
-### `data/processed/*.csv`
-
-- Output of the transformation step.
-- Structured files ready for direct ingestion into ClickHouse.
+- **`data/processed/*.csv`**  
+  Output directory for structured CSVs generated during the transformation step.
 
 ---
 
 ## 3. ETL Overview
 
-1. **Transform**  
-   Parses raw semi-structured event logs and converts them into structured CSV tables conforming to a star schema.
+This ETL pipeline processes raw event logs into normalized CSVs and loads them into ClickHouse using modular Python scripts.
 
-2. **Load**  
-   Loads the resulting CSVs into a ClickHouse database using optimized table definitions for analytical workloads.
+### Transform
 
-Each step is executed sequentially and manually through scripts. Automation is intentionally omitted to focus on clarity and transparency of each stage.
-
-### Transform Step
-
-Raw event logs are processed into four normalized tables:
+Parses semi-structured logs into four tables:
 
 - `dim_user.csv`
 - `dim_course.csv`
 - `dim_time.csv`
 - `fact_enrollment.csv`
 
-Transformation is handled by the `log_transformer.py` script. It parses each log entry, extracts structured fields, and groups them into dimension and fact records based on the star schema design.
+Handled by `etl/log_transformer.py`. Ensures:
 
-To run the transformation:
+- No duplicates in dimensions
+- Standardized timestamps and formats
+- UTF-8 encoding with headers
 
-```bash
-python etl/main_etl.py
-```
-
-Output files will be saved in:
-
-```bash
-data/processed/
-```
-
-The transformation script ensures:
-
-- No duplicates in dimension tables
-- Consistent formatting for timestamps and identifiers
-- Encoding is preserved as UTF-8 with headers
-
-### Load Step
-
-Transformed CSV files are loaded into ClickHouse dimension and fact tables using the `clickhouse_loader.py` script.
-
-This script connects to the database using credentials stored in the `.env` file and performs data insertion using the official `clickhouse-connect` client.
-
-To run the full ETL (transform + load):
+Run:
 
 ```bash
 python etl/main_etl.py
 ```
 
-The loader handles:
+Output: `data/processed/`
 
-- Column type conversion (e.g., string to `DateTime`, `UInt64`)
-- Null value handling for `Nullable()` columns
-- Row validation before insertion
+### Load
 
-All CSVs must be:
+Inserts structured CSVs into ClickHouse using `etl/clickhouse_loader.py`.
+
+Features:
+
+- Type conversion (e.g., string → `DateTime`, `UInt64`)
+- Null handling and row validation
+
+Run:
+
+```bash
+python etl/main_etl.py
+```
+
+Schema: `sql/schema_definition.sql`  
+Credentials: `.env`
+
+CSV requirements:
 
 - Comma-separated
 - UTF-8 encoded
-- Contain header rows
-
-The database schema is defined in:
-
-```bash
-sql/schema_definition.sql
-```
+- With header rows
 
 ---
 
 ## 4. Schema Overview
 
-### Fact Table
+This star schema supports efficient analytical queries on course enrollment data in ClickHouse.
 
-- **fact_enrollment**  
-  Captures enrollment transactions with foreign keys to dimension tables and relevant measures.
+1. **Fact Table: `fact_enrollment`**
 
-### Dimension Tables
+   | Column        | Data Type                          | Description                                                       |
+   | ------------- | ---------------------------------- | ----------------------------------------------------------------- |
+   | `time_id`     | `DateTime`                         | Timestamp of the enrollment event                                 |
+   | `user_id`     | `UInt64`                           | References `dim_user.user_id`                                     |
+   | `course_id`   | `LowCardinality(String)`           | References `dim_course.course_id`                                 |
+   | `price`       | `UInt32`                           | Original price of the course                                      |
+   | `promo_code`  | `LowCardinality(Nullable(String))` | Promo code used if available, but discount value is not recorded. |
+   | `final_price` | `Nullable(UInt32)`                 | Price after discount (if any)                                     |
 
-- **dim_user**  
-  Contains user information such as user ID, name, and city.
+2. **Dimension Table: `dim_user`**
 
-- **dim_course**  
-  Contains course-related information such as course ID, name, and category.
+   | Column      | Data Type                | Description       |
+   | ----------- | ------------------------ | ----------------- |
+   | `user_id`   | `UInt64`                 | Unique identifier |
+   | `user_name` | `String`                 | Full name         |
+   | `user_city` | `LowCardinality(String)` | City of residence |
 
-- **dim_time**  
-  Captures temporal breakdown of enrollment time, including date, year, month, day, and hour.
+3. **Dimension Table: `dim_course`**
 
-Each table is optimized using appropriate data types and indexing strategies for efficient querying in ClickHouse.
+   | Column        | Data Type                | Description              |
+   | ------------- | ------------------------ | ------------------------ |
+   | `course_id`   | `LowCardinality(String)` | Unique course identifier |
+   | `course_name` | `String`                 | Title of the course      |
+   | `category`    | `LowCardinality(String)` | Category of the course   |
+
+4. **Dimension Table: `dim_time`**
+
+   | Column    | Data Type  | Description                |
+   | --------- | ---------- | -------------------------- |
+   | `time_id` | `DateTime` | Timestamp surrogate key    |
+   | `date`    | `Date`     | Calendar date (YYYY-MM-DD) |
+   | `year`    | `UInt16`   | Year component             |
+   | `month`   | `UInt8`    | Month component            |
+   | `day`     | `UInt8`    | Day component              |
+   | `hour`    | `UInt8`    | Hour of the day (0–23)     |
 
 ---
 
-## 5. Data Types & Optimization
+## 5. Data Types & Optimization Strategies in ClickHouse
 
-- **LowCardinality(String)**  
-  Applied to columns with repeated string values such as `course_id`, `user_city`, and `promo_code`, reducing storage and improving performance.
+ClickHouse offers fine-grained control over storage and performance through type-level and schema-level optimizations. Below is a breakdown of the key choices made in this project, along with comparisons to defaults in other columnar databases:
 
-- **Nullable(...)**  
-  Used for optional fields like `promo_code` and `final_price`, allowing explicit `NULL` handling.
+| Feature             | Implementation in ClickHouse             | Why It Matters                                  | In Other Systems                                                    |
+| ------------------- | ---------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------- |
+| **String Handling** | `LowCardinality(String)`                 | Reduces memory usage and speeds up filters      | Often handled automatically (e.g., dictionary encoding in BigQuery) |
+| **Optional Fields** | `Nullable(...)`                          | Enables explicit `NULL` support                 | Usually implicit, sometimes less efficient                          |
+| **Timestamps**      | `DateTime`, `Date`                       | Precise granularity; supports time functions    | Often `TIMESTAMP` with fewer tuning options                         |
+| **Numeric IDs**     | `UInt32`, `UInt64`                       | Space-efficient for positive integers           | Commonly `INT`/`BIGINT`, often signed                               |
+| **Partitioning**    | `PARTITION BY toYYYYMM(time_id)`         | Improves range queries and time-based retention | Often abstracted, e.g., partition decorators                        |
+| **Indexing**        | `ORDER BY (course_id, time_id, user_id)` | Enables fast scans and index-aware queries      | Redshift uses sort keys; BigQuery relies on column pruning          |
 
-- **DateTime / Date**  
-  Used to store time-based values with correct granularity, ensuring compatibility with time functions and partitioning.
-
-- **UInt32 / UInt64**  
-  Chosen for numeric identifiers and measures to provide sufficient range with optimized memory usage.
-
-- **PARTITION BY**  
-  Time-based partitioning (e.g., `toYYYYMM(time_id)`) improves data management and range queries.
-
-- **ORDER BY**  
-  Defined using a combination of dimension keys and time to enable fast filtered queries on frequently queried columns.
+> **Takeaway**: Unlike BigQuery or Redshift which abstract many storage optimizations, ClickHouse requires **explicit design decisions**, but rewards that effort with **faster query performance** and **lower storage cost** when done correctly.
 
 ---
 
@@ -197,7 +183,7 @@ Each table is optimized using appropriate data types and indexing strategies for
 
 ```bash
 python -m venv .venv
-.venv\Scripts\activate         # On Windows (PowerShell)
+.venv\Scripts\activate         # On Windows
 source .venv/bin/activate      # On macOS/Linux
 ```
 
@@ -212,11 +198,11 @@ pip install -r requirements.txt
 Create a `.env` file in the root directory:
 
 ```env
-CLICKHOUSE_HOST=clickhouse_host
+CLICKHOUSE_HOST=<your_clickhouse_host>
 CLICKHOUSE_PORT=8123
-CLICKHOUSE_DB=database_name
-CLICKHOUSE_USER=username
-CLICKHOUSE_PASSWORD=password
+CLICKHOUSE_DB=<your_database_name>
+CLICKHOUSE_USER=<your_clickhouse_username>
+CLICKHOUSE_PASSWORD=<your_clickhouse_password>
 ```
 
 ---
@@ -228,7 +214,7 @@ CLICKHOUSE_PASSWORD=password
 Place the raw enrollment log file in the following directory:
 
 ```bash
-data/raw/event_logs.txt
+data/raw/enrollment_logs.txt
 ```
 
 ### Step 2: Run the ETL Pipeline
@@ -243,7 +229,7 @@ This script performs the following steps:
 
 1. Parses raw logs into structured tables.
 2. Writes CSV outputs to `data/processed/`.
-3. Loads those CSVs into ClickHouse via the `clickhouse_loader.py` module.
+3. Loads those CSVs into ClickHouse via the `etl/clickhouse_loader.py` module.
 
 ### Step 3: Query the Data
 
@@ -275,32 +261,24 @@ This approach ensures visibility of process status while enabling partial succes
 
 ## 9. Troubleshooting Tips
 
-- **Unexpected EOF while reading bytes**  
-  Cause: Corrupted or incomplete CSV files.  
-  Fix: Regenerate processed files by re-running the transformation step.
+- **EOF error during file read**  
+  **Cause**: Incomplete or corrupted CSV output.  
+  **Fix**: Delete `data/processed/` and re-run `etl/log_transformer.py`.
 
-- **'str' object has no attribute 'timestamp'**  
-  Cause: Datetime fields are still strings instead of Python datetime objects.  
-  Fix: Ensure `pd.to_datetime()` is applied to datetime columns before loading.
+- **`'str' object has no attribute 'timestamp'`**  
+  **Cause**: Datetime columns not converted properly.  
+  **Fix**: Apply `pd.to_datetime()` before transformations or loads.
 
-- **Cannot parse input: expected ','**  
-  Cause: Attempting to run `INSERT ... INFILE` syntax incorrectly in DBeaver or ClickHouse CLI.  
-  Fix: Use `clickhouse_loader.py` for loading CSV files programmatically.
+- **ClickHouse CSV parse error (e.g., "expected ','")**  
+  **Cause**: Manual `INSERT ... INFILE` execution misused.  
+  **Fix**: Always use `etl/clickhouse_loader.py` to load CSVs.
 
-- **Permission errors when activating virtual environment**  
-  Cause: Windows PowerShell script execution is disabled by default.  
-  Fix: Run the following command with admin rights to allow scripts:
-
-  ```powershell
-  Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
-  ```
-
-- **Duplicate rows in ClickHouse**  
-  Cause: ETL script run multiple times without clearing tables.  
-  Fix: Run the cleanup query:
+- **Duplicate rows in fact or dimension tables**  
+  **Cause**: Re-running ETL without clearing existing records.  
+  **Fix**: Run:
 
   ```sql
   TRUNCATE TABLE <table_name>;
   ```
 
-Refer to transformation and loading logs for more detailed error context.
+> Check transformation and loading logs for full stack traces and error context.

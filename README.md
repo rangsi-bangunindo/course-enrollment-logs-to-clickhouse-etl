@@ -10,7 +10,7 @@ An ETL project that processes course enrollment event logs into a star-schema da
 course-enrollment-logs-to-clickhouse-etl/
 ├── data/
 │   ├── raw/                         # Input text log files
-│   │   └── enrollment_events.txt    # Raw enrollment event logs
+│   │   └── enrollment_logs.txt      # Raw enrollment event logs
 │   └── processed/                   # Output CSV files
 │       ├── dim_user.csv
 │       ├── dim_course.csv
